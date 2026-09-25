@@ -1,4 +1,3 @@
-from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from .models import Emenitites, Movie
 from django.http import JsonResponse
@@ -6,14 +5,13 @@ from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.contrib.auth.models import User
 
-@login_required(login_url="/login/")
 def home(request):
     emenities = Emenitites.objects.all()
     context = {'emenities': emenities}
     return render(request, 'home.html', context)
 
-@login_required(login_url="/login/")
 def api_movies(request):
     movies_objs = Movie.objects.all()
     
@@ -55,7 +53,7 @@ def login_page(request):
             
         except Exception as e:
             messages.error(request, "Something went wrong")
-            return redirect('/register/')
+            return redirect('/login/')
         
     return render(request, "login.html")
 
