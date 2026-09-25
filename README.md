@@ -30,7 +30,7 @@ core/
 │   ├── migrations/
 │   ├── templates/
 │   │   ├── base.html
-│   │   ├── home.html
+│   │   ├── home.html 
 │   │   ├── login.html
 │   │   └── register.html
 │   ├── admin.py
