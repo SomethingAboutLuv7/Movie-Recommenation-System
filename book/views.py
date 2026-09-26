@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Emenitites, Movie, Actor, Booking, Showtime
+from .models import Emenitites, Movie, Actor, Director, Writer, Booking, Showtime
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, logout
@@ -44,6 +44,8 @@ def movie_detail(request, movie_id):
         'movie_image': movie_obj.movie_image,
         'price': movie_obj.price,
         'actors': [{'name': a.name, 'photo': a.photo} for a in movie_obj.actors.all()],
+        'directors': [{'name': d.name, 'photo': d.photo} for d in movie_obj.directors.all()],
+        'writers': [{'name': w.name, 'photo': w.photo} for w in movie_obj.writers.all()],
     }
     return JsonResponse(payload)
 

@@ -118,19 +118,19 @@
             fetch(`/api/movies/${movieId}/`)
             .then(result => result.json())
             .then(movie => {
-                var actorsHtml = '';
-                if (movie.actors && movie.actors.length > 0) {
-                    movie.actors.forEach(actor => {
-                        actorsHtml += `<div class="actor-card"><img src="${actor.photo}" alt="${actor.name}"><p>${actor.name}</p></div>`;
-                    });
-                } else {
-                    actorsHtml = '<p class="gfgd">No cast info added yet.</p>';
+                function renderPeople(list) {
+                    if (!list || list.length === 0) return '<p class="gfgd">Not added yet.</p>';
+                    return list.map(p => `<div class="actor-card"><img src="${p.photo}" alt="${p.name}"><p>${p.name}</p></div>`).join('');
                 }
                 var html = `
                     <h4>${movie.movie_name}</h4>
                     <p class="gfgd">${movie.movie_description}</p>
+                    <h5>Director${movie.directors.length > 1 ? 's' : ''}</h5>
+                    <div>${renderPeople(movie.directors)}</div>
+                    <h5>Writer${movie.writers.length > 1 ? 's' : ''}</h5>
+                    <div>${renderPeople(movie.writers)}</div>
                     <h5>Cast</h5>
-                    <div>${actorsHtml}</div>
+                    <div>${renderPeople(movie.actors)}</div>
                     <div class="price-tag">$${movie.price} per seat</div>
                     <button type="button" class="btn" onclick="bookMovie(${movie.id})">Book Now</button>
                 `;

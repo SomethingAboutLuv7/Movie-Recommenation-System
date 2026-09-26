@@ -5,5 +5,7 @@ from book.models import *
 admin.site.register(Emenitites)
 admin.site.register(Movie)
 admin.site.register(Actor)
+admin.site.register(Director)
+admin.site.register(Writer)
 admin.site.register(Booking)
 admin.site.register(Showtime)

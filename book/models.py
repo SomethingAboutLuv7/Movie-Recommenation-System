@@ -16,6 +16,24 @@ class Actor(models.Model):
         return self.name
 
 
+class Director(models.Model):
+    name = models.CharField(max_length=100)
+    photo = models.CharField(max_length=500)
+    bio = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Writer(models.Model):
+    name = models.CharField(max_length=100)
+    photo = models.CharField(max_length=500)
+    bio = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class Movie(models.Model):
     movie_name = models.CharField(max_length=100)
     movie_description = models.TextField()
@@ -24,6 +42,8 @@ class Movie(models.Model):
     total_seats = models.IntegerField(default=50)
     emenities = models.ManyToManyField(Emenitites)
     actors = models.ManyToManyField(Actor, blank=True)
+    directors = models.ManyToManyField(Director, blank=True)
+    writers = models.ManyToManyField(Writer, blank=True)
 
     def __str__(self):
         return self.movie_name
