@@ -4,7 +4,7 @@ A Django-based movie recommendation web application with user authentication, an
 
 ## 🔗 Live Demo
 
-**[https://movie-recommenation-system.onrender.com/](https://movie-recommenation-system.onrender.com/)**
+**[https://movie-recommenation-system.onrender.com/#!](https://movie-recommenation-system.onrender.com/#!)**
 
 > Note: This is hosted on Render's free tier. The app may take 30–60 seconds to load on the first visit after a period of inactivity, as the free instance spins down when idle.
 
