@@ -1,4 +1,4 @@
-# 🎬 Movie Recommendation System
+# 🎬 Movie Platform with Ticket Booking System 
 
 A Django-based movie recommendation web application with user authentication, an admin-managed movie catalog, and amenity-based filtering — styled with a dark, cinematic theme.
 
