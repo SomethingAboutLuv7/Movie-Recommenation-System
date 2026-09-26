@@ -5,52 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Django Movies</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
-        body {
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
-            min-height: 100vh;
-            margin: 0;
-        }
+        body { background: linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%); min-height: 100vh; margin: 0; }
         .nav-wrapper { background-color: #1a1a2e; border-bottom: 3px solid #e50914; }
         .brand-logo { margin-left: 20px; margin-top: -1%; color: #fff !important; }
         .container { margin-top: 20px; }
-        .card {
-            margin: 10px;
-            width: 100%;
-            background-color: #1e1e2f;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.2s ease;
-        }
+        .card { margin: 10px; width: 100%; background-color: #1e1e2f; box-shadow: 0 8px 20px rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden; transition: transform 0.2s ease; }
         .card:hover { transform: scale(1.03); }
-        .card-title { font-size: 1.2rem; color: #fff; }
         .input-field { margin-bottom: 20px; }
         .card-content { text-align: center; background-color: #1e1e2f; }
-        #web { margin-left: 85%; font-size: 20px; font-weight: bold; padding: 5px 20px; border-radius: 9px; background-color: rgb(235, 100, 100); }
+        #oooo { background-color: #e50914; margin-left: 20px; }
         .JT { margin-top: -10%; font-size: 23px; color: #f5f5f5; font-weight: 400; }
-        #oooo { background-color: #e50914; margin-left: 1600px; }
-        .ex23 { font-size: 17px; }
         .gfg1 { color: #ffffff; font-size: 25px; font-weight: bold; }
         .gfgd { color: #b3b3b3; }
         .btn { padding: 0px 10px; font-weight: bold; background-color: #e50914; }
         .card img { width: 100%; height: 300px; object-fit: cover; }
+        .card-action { display: flex; gap: 10px; justify-content: center; padding-bottom: 15px; }
+        #movieModal { background-color: #1e1e2f; color: #f5f5f5; }
+        #movieModal .modal-footer { background-color: #1e1e2f; }
+        .actor-card { display: inline-block; text-align: center; margin: 10px; width: 100px; }
+        .actor-card img { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; }
+        .actor-card p { font-size: 13px; margin-top: 5px; color: #f5f5f5; }
+        .price-tag { font-size: 22px; color: #e50914; font-weight: bold; margin: 15px 0; }
+        .seat { display: inline-flex; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
     <nav>
         <div class="nav-wrapper">
             <a href="/" class="brand-logo"><h4><b>Movie Recommendation System </b></h4></a>
-            <button class="btn btn-danger" id="oooo"> <a  href="{% url 'logout' %}">Logout </a></button>
+            {% if user.is_authenticated %}
+                <a href="{% url 'my_bookings' %}" class="btn" style="margin-left:20px;">My Bookings</a>
+            {% endif %}
+            <button class="btn btn-danger" id="oooo" style="float:right;margin-right:20px;"> <a href="{% url 'logout' %}" style="color:#fff;">Logout</a></button>
         </div>
     </nav>
-    <br>
-    <br>
+    <br><br>
 
     <div class="container">
         <div class="row">
@@ -62,31 +55,39 @@
                             <option value="{{emenitie.id}}">{{emenitie.name}}</option>
                         {% endfor %}
                     </select>
-                    <label for="emenities"><h3 class="JT"> <i class="fas fa-suitcase"></i> Select Movie   :</h3></label>
+                    <label for="emenities"><h3 class="JT"><i class="fas fa-suitcase"></i> Select Movie :</h3></label>
                 </div>
             </div>
         </div>
     </div>
-    <div class="container">
-        <div class="row" id="show_movies_here">
+    <div class="container"><div class="row" id="show_movies_here"></div></div>
+
+    <div id="movieModal" class="modal">
+        <div class="modal-content" id="movieModalContent"></div>
+        <div class="modal-footer" style="background-color:#1e1e2f;">
+            <a href="#!" class="modal-close btn-flat" style="color:#f5f5f5;">Close</a>
         </div>
     </div>
 
+    {% csrf_token %}
+
     <script>
         var show_movies_here = document.getElementById("show_movies_here");
+        var csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        var isLoggedIn = {{ user.is_authenticated|yesno:"true,false" }};
+        var selectedSeats = [];
+        var currentShowtimeId = null;
+        var currentPrice = 0;
 
         $(document).ready(function(){
             $('select').formSelect();
+            $('.modal').modal();
         });
 
         function getMovies() {
             var instance = M.FormSelect.getInstance(document.getElementById('emenities'));
-            var emenities = '';
+            var emenities = instance ? instance.getSelectedValues() : '';
             var html = '';
-
-            if(instance){
-                emenities = instance.getSelectedValues();
-            }
 
             fetch(`/api/movies?emenities=${emenities}`)
             .then(result => result.json())
@@ -99,8 +100,11 @@
                                 <div class="card-content">
                                     <span class="gfg1">${response[i].movie_name}</span>
                                     <p class="gfgd">${response[i].movie_description}</p>
-                                    <br>
-                                    <button type="submit" class="btn">Book</button>
+                                    <div class="price-tag">$${response[i].price}</div>
+                                </div>
+                                <div class="card-action">
+                                    <button type="button" class="btn" onclick="showMovieInfo(${response[i].id})">Info</button>
+                                    <button type="button" class="btn" onclick="bookMovie(${response[i].id})">Book</button>
                                 </div>
                             </div>
                         </div>
@@ -109,7 +113,112 @@
                 show_movies_here.innerHTML = html;
             });
         }
-       getMovies()
+
+        function showMovieInfo(movieId) {
+            fetch(`/api/movies/${movieId}/`)
+            .then(result => result.json())
+            .then(movie => {
+                var actorsHtml = '';
+                if (movie.actors && movie.actors.length > 0) {
+                    movie.actors.forEach(actor => {
+                        actorsHtml += `<div class="actor-card"><img src="${actor.photo}" alt="${actor.name}"><p>${actor.name}</p></div>`;
+                    });
+                } else {
+                    actorsHtml = '<p class="gfgd">No cast info added yet.</p>';
+                }
+                var html = `
+                    <h4>${movie.movie_name}</h4>
+                    <p class="gfgd">${movie.movie_description}</p>
+                    <h5>Cast</h5>
+                    <div>${actorsHtml}</div>
+                    <div class="price-tag">$${movie.price} per seat</div>
+                    <button type="button" class="btn" onclick="bookMovie(${movie.id})">Book Now</button>
+                `;
+                document.getElementById('movieModalContent').innerHTML = html;
+                M.Modal.getInstance(document.getElementById('movieModal')).open();
+            });
+        }
+
+        function bookMovie(movieId) {
+            if (!isLoggedIn) {
+                window.location.href = "/login/";
+                return;
+            }
+            fetch(`/api/movies/${movieId}/showtimes/`)
+            .then(r => r.json())
+            .then(showtimes => {
+                var html = `<h4>Select a showtime</h4>`;
+                if (showtimes.length === 0) {
+                    html += `<p class="gfgd">No showtimes available for this movie yet. Add one in the admin panel.</p>`;
+                } else {
+                    showtimes.forEach(s => {
+                        html += `<button type="button" class="btn" style="margin:5px;display:block;" onclick="showSeatMap(${s.id})">${s.date_time} &mdash; ${s.seats_left} seats left</button>`;
+                    });
+                }
+                document.getElementById('movieModalContent').innerHTML = html;
+                M.Modal.getInstance(document.getElementById('movieModal')).open();
+            });
+        }
+
+        function showSeatMap(showtimeId) {
+            currentShowtimeId = showtimeId;
+            selectedSeats = [];
+            fetch(`/api/showtimes/${showtimeId}/seats/`)
+            .then(r => r.json())
+            .then(data => {
+                currentPrice = data.price;
+                var html = `<h4>Select your seats</h4><div style="display:flex;flex-wrap:wrap;max-width:420px;">`;
+                for (var i = 1; i <= data.total_seats; i++) {
+                    var booked = data.booked_seats.includes(i);
+                    html += `<div class="seat" data-seat="${i}" style="width:32px;height:32px;margin:3px;border-radius:4px;cursor:${booked ? 'not-allowed' : 'pointer'};background-color:${booked ? '#555' : '#333'};color:#fff;" ${booked ? '' : `onclick="toggleSeat(${i}, this)"`}>${i}</div>`;
+                }
+                html += `</div>
+                    <p id="selectedSeatsText" class="gfgd">Selected: none</p>
+                    <div class="price-tag" id="seatTotal">$0</div>
+                    <button type="button" class="btn" onclick="showPayment()">Continue to Payment</button>`;
+                document.getElementById('movieModalContent').innerHTML = html;
+            });
+        }
+
+        function toggleSeat(num, el) {
+            var idx = selectedSeats.indexOf(num);
+            if (idx > -1) {
+                selectedSeats.splice(idx, 1);
+                el.style.backgroundColor = '#333';
+            } else {
+                selectedSeats.push(num);
+                el.style.backgroundColor = '#e50914';
+            }
+            document.getElementById('selectedSeatsText').innerText = 'Selected: ' + (selectedSeats.length ? selectedSeats.join(', ') : 'none');
+            document.getElementById('seatTotal').innerText = '$' + (selectedSeats.length * currentPrice);
+        }
+
+        function showPayment() {
+            if (selectedSeats.length === 0) {
+                M.toast({html: 'Select at least one seat'});
+                return;
+            }
+            var total = selectedSeats.length * currentPrice;
+            var html = `
+                <h4>Payment</h4>
+                <p class="gfgd">Seats: ${selectedSeats.join(', ')}</p>
+                <div class="price-tag">Total: $${total}</div>
+                <div class="input-field"><input type="text" placeholder="Card Number" maxlength="19"></div>
+                <div class="input-field">
+                    <input type="text" placeholder="MM/YY" style="width:45%;display:inline-block;">
+                    <input type="text" placeholder="CVV" style="width:45%;display:inline-block;margin-left:10%;">
+                </div>
+                <p style="font-size:12px;color:#888;">Prototype only &mdash; no real payment is processed.</p>
+                <form action="/book/${currentShowtimeId}/" method="POST">
+                    <input type="hidden" name="csrfmiddlewaretoken" value="${csrftoken}">
+                    <input type="hidden" name="seat_numbers" value="${selectedSeats.join(',')}">
+                    <button type="submit" class="btn">Pay Now</button>
+                </form>
+            `;
+            document.getElementById('movieModalContent').innerHTML = html;
+        }
+
+        getMovies();
     </script>
 </body>
 </html>
